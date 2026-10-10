@@ -1,0 +1,66 @@
+{
+  "date": "2026-10-10",
+  "version": "0.3.0",
+  "artifacts": [
+    {
+      "platform": "windows-x64",
+      "format": "PE",
+      "machine": 34404,
+      "size": 35036672,
+      "sha256": "3758b7727c8220247d06fb30bb099c7b15035a1571e46f223d486c1194f4a5e4",
+      "compiled": true,
+      "runtime_tested": true,
+      "glibc_max_required_version": null
+    },
+    {
+      "platform": "windows-x86",
+      "format": "PE",
+      "machine": 332,
+      "size": 34768384,
+      "sha256": "16ab252a32923a622779f4e4054c963debba3ca01b1c1f42cdab78794809028b",
+      "compiled": true,
+      "runtime_tested": true,
+      "glibc_max_required_version": null
+    },
+    {
+      "platform": "windows-arm64",
+      "format": "PE",
+      "machine": 43620,
+      "size": 33016320,
+      "sha256": "0c85e0ffa80b3406b45ee4a1b1101bc184bd11a67da32adecc0aff7fa5d04fed",
+      "compiled": true,
+      "runtime_tested": false,
+      "glibc_max_required_version": null
+    },
+    {
+      "platform": "linux-x64",
+      "format": "ELF",
+      "machine": 62,
+      "size": 41211800,
+      "sha256": "8a5bfa29f58327b6c68ea51f78eba1dddafaed121b50a72682635b6d4f4f6628",
+      "compiled": true,
+      "runtime_tested": false,
+      "glibc_max_required_version": "2.28"
+    },
+    {
+      "platform": "linux-x86",
+      "format": "ELF",
+      "machine": 3,
+      "size": 41331196,
+      "sha256": "2fffe792a3f939e744a2983a5863c984cc9539c183be46e0a06b27b340415d16",
+      "compiled": true,
+      "runtime_tested": false,
+      "glibc_max_required_version": "2.28"
+    },
+    {
+      "platform": "linux-arm64",
+      "format": "ELF",
+      "machine": 183,
+      "size": 38889960,
+      "sha256": "5a41c05318e7c7b7b59846be8cd0c962cba9d2bb6b88ed64911bca8c6e5e9aa0",
+      "compiled": true,
+      "runtime_tested": false,
+      "glibc_max_required_version": "2.28"
+    }
+  ]
+}

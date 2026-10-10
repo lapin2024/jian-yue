@@ -1,0 +1,22 @@
+#pragma code_page(65001)
+1 ICON "assets/icons/app.ico"
+1 VERSIONINFO
+FILEVERSION 0,3,0,0
+PRODUCTVERSION 0,3,0,0
+FILETYPE 1
+BEGIN
+  BLOCK "StringFileInfo"
+  BEGIN
+    BLOCK "040904B0"
+    BEGIN
+      VALUE "FileDescription", "简阅 - OFD / PDF Reader\0"
+      VALUE "ProductName", "简阅\0"
+      VALUE "FileVersion", "0.3.0\0"
+      VALUE "ProductVersion", "0.3.0\0"
+    END
+  END
+  BLOCK "VarFileInfo"
+  BEGIN
+    VALUE "Translation", 0x409, 1200
+  END
+END

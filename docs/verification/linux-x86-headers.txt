@@ -1,0 +1,130 @@
+ELF Header:
+  Magic:   7f 45 4c 46 01 01 01 00 00 00 00 00 00 00 00 00
+  Class:                             ELF32
+  Data:                              2's complement, little endian
+  Version:                           1 (current)
+  OS/ABI:                            UNIX - System V
+  ABI Version:                       0
+  Type:                              DYN (Shared object file)
+  Machine:                           Intel 80386
+  Version:                           0x1
+  Entry point address:               0x1a298b0
+  Start of program headers:          52 (bytes into file)
+  Start of section headers:          41330036 (bytes into file)
+  Flags:                             0x0
+  Size of this header:               52 (bytes)
+  Size of program headers:           32 (bytes)
+  Number of program headers:         12
+  Size of section headers:           40 (bytes)
+  Number of section headers:         29
+  Section header string table index: 28
+Dynamic section at offset 0x2767480 contains 28 entries:
+  Tag        Type           Name/Value
+  0x00000001 (NEEDED)       Shared library: [libm.so.6]
+  0x00000001 (NEEDED)       Shared library: [libpthread.so.0]
+  0x00000001 (NEEDED)       Shared library: [libc.so.6]
+  0x00000001 (NEEDED)       Shared library: [libdl.so.2]
+  0x00000001 (NEEDED)       Shared library: [ld-linux.so.2]
+  0x0000001e (FLAGS)        BIND_NOW 
+  0x6ffffffb (FLAGS_1)      NOW PIE 
+  0x00000015 (DEBUG)        0x0
+  0x00000011 (REL)          0x1cfc
+  0x00000012 (RELSZ)        332440 (bytes)
+  0x00000013 (RELENT)       8 (bytes)
+  0x6ffffffa (RELCOUNT)     41545
+  0x00000017 (JMPREL)       0x52f94
+  0x00000002 (PLTRELSZ)     1280 (bytes)
+  0x00000003 (PLTGOT)       0x2769b94
+  0x00000014 (PLTREL)       REL
+  0x00000006 (SYMTAB)       0x1e8
+  0x0000000b (SYMENT)       16 (bytes)
+  0x00000005 (STRTAB)       0x14e4
+  0x0000000a (STRSZ)        2071 (bytes)
+  0x6ffffef5 (GNU_HASH)     0xf94
+  0x00000004 (HASH)         0xfac
+  0x00000019 (INIT_ARRAY)   0x276947c
+  0x0000001b (INIT_ARRAYSZ) 4 (bytes)
+  0x6ffffff0 (VERSYM)       0xc48
+  0x6ffffffe (VERNEED)      0xd94
+  0x6fffffff (VERNEEDNUM)   5
+  0x00000000 (NULL)         0x0
+Version symbols section '.gnu.version' contains 166 entries:
+ Addr: 0000000000000c48  Offset: 0x000c48  Link: 3 (.dynsym)
+  000:   0 (*local*)       2 (GLIBC_2.0)     3 (GLIBC_2.2)     2 (GLIBC_2.0)  
+  004:   2 (GLIBC_2.0)     2 (GLIBC_2.0)     2 (GLIBC_2.0)     2 (GLIBC_2.0)  
+  008:   2 (GLIBC_2.0)     2 (GLIBC_2.0)     2 (GLIBC_2.0)     2 (GLIBC_2.0)  
+  00c:   2 (GLIBC_2.0)     4 (GLIBC_2.0)     4 (GLIBC_2.0)     4 (GLIBC_2.0)  
+  010:   5 (GLIBC_2.12)    4 (GLIBC_2.0)     4 (GLIBC_2.0)     4 (GLIBC_2.0)  
+  014:   4 (GLIBC_2.0)     2 (GLIBC_2.0)     6 (GLIBC_2.27)    2 (GLIBC_2.0)  
+  018:   2 (GLIBC_2.0)     7 (GLIBC_2.1)     8 (GLIBC_2.0)     8 (GLIBC_2.0)  
+  01c:   6 (GLIBC_2.27)    8 (GLIBC_2.0)     8 (GLIBC_2.0)     8 (GLIBC_2.0)  
+  020:   7 (GLIBC_2.1)     8 (GLIBC_2.0)     8 (GLIBC_2.0)     6 (GLIBC_2.27) 
+  024:   9 (GLIBC_2.3)     a (GLIBC_2.3)     2 (GLIBC_2.0)     b (GLIBC_2.1)  
+  028:   2 (GLIBC_2.0)     4 (GLIBC_2.0)     2 (GLIBC_2.0)     c (GLIBC_2.0)  
+  02c:   4 (GLIBC_2.0)     d (GLIBC_2.1)     c (GLIBC_2.0)     c (GLIBC_2.0)  
+  030:   8 (GLIBC_2.0)     6 (GLIBC_2.27)    8 (GLIBC_2.0)     8 (GLIBC_2.0)  
+  034:   7 (GLIBC_2.1)     e (GLIBC_2.2)     2 (GLIBC_2.0)     8 (GLIBC_2.0)  
+  038:   8 (GLIBC_2.0)     8 (GLIBC_2.0)     8 (GLIBC_2.0)     8 (GLIBC_2.0)  
+  03c:   f (GLIBC_2.3.2)   2 (GLIBC_2.0)     4 (GLIBC_2.0)     2 (GLIBC_2.0)  
+  040:   2 (GLIBC_2.0)     4 (GLIBC_2.0)     4 (GLIBC_2.0)     2 (GLIBC_2.0)  
+  044:   4 (GLIBC_2.0)     2 (GLIBC_2.0)     4 (GLIBC_2.0)     b (GLIBC_2.1)  
+  048:   2 (GLIBC_2.0)     e (GLIBC_2.2)     2 (GLIBC_2.0)    10 (GLIBC_2.2.3)
+  04c:   e (GLIBC_2.2)     4 (GLIBC_2.0)     4 (GLIBC_2.0)     2 (GLIBC_2.0)  
+  050:   2 (GLIBC_2.0)     2 (GLIBC_2.0)    11 (GLIBC_2.1.2)   3 (GLIBC_2.2)  
+  054:   2 (GLIBC_2.0)     2 (GLIBC_2.0)    12 (GLIBC_2.3.4)   2 (GLIBC_2.0)  
+  058:   2 (GLIBC_2.0)     2 (GLIBC_2.0)     2 (GLIBC_2.0)     2 (GLIBC_2.0)  
+  05c:   2 (GLIBC_2.0)     4 (GLIBC_2.0)     2 (GLIBC_2.0)     b (GLIBC_2.1)  
+  060:   2 (GLIBC_2.0)     b (GLIBC_2.1)    13 (GLIBC_2.1)     2 (GLIBC_2.0)  
+  064:  14 (GLIBC_2.16)    2 (GLIBC_2.0)    13 (GLIBC_2.1)    13 (GLIBC_2.1)  
+  068:  13 (GLIBC_2.1)     1 (*global*)     15 (GLIBC_2.17)    2 (GLIBC_2.0)  
+  06c:   2 (GLIBC_2.0)     2 (GLIBC_2.0)     2 (GLIBC_2.0)    16 (GLIBC_2.28) 
+  070:   2 (GLIBC_2.0)     3 (GLIBC_2.2)     b (GLIBC_2.1)    17 (GLIBC_2.9)  
+  074:   2 (GLIBC_2.0)     1 (*global*)      1 (*global*)      1 (*global*)   
+  078:   1 (*global*)      3 (GLIBC_2.2)     3 (GLIBC_2.2)     4 (GLIBC_2.0)  
+  07c:   4 (GLIBC_2.0)     3 (GLIBC_2.2)     3 (GLIBC_2.2)     3 (GLIBC_2.2)  
+  080:   2 (GLIBC_2.0)     2 (GLIBC_2.0)     3 (GLIBC_2.2)     3 (GLIBC_2.2)  
+  084:   3 (GLIBC_2.2)    18 (GLIBC_2.15)    2 (GLIBC_2.0)     2 (GLIBC_2.0)  
+  088:   2 (GLIBC_2.0)     2 (GLIBC_2.0)     2 (GLIBC_2.0)     2 (GLIBC_2.0)  
+  08c:   2 (GLIBC_2.0)     2 (GLIBC_2.0)     2 (GLIBC_2.0)     2 (GLIBC_2.0)  
+  090:   4 (GLIBC_2.0)    19 (GLIBC_2.25)   1a (GLIBC_2.18)    4 (GLIBC_2.0)  
+  094:   4 (GLIBC_2.0)     4 (GLIBC_2.0)    1b (GLIBC_2.2.4)   8 (GLIBC_2.0)  
+  098:  13 (GLIBC_2.1)    1b (GLIBC_2.2.4)   2 (GLIBC_2.0)     2 (GLIBC_2.0)  
+  09c:   2 (GLIBC_2.0)    13 (GLIBC_2.1)    13 (GLIBC_2.1)     c (GLIBC_2.0)  
+  0a0:   2 (GLIBC_2.0)    13 (GLIBC_2.1)     2 (GLIBC_2.0)     3 (GLIBC_2.2)  
+  0a4:  1c (GLIBC_2.4)     3 (GLIBC_2.2)  
+
+Version needs section '.gnu.version_r' contains 5 entries:
+ Addr: 0000000000000d94  Offset: 0x000d94  Link: 8 (.dynstr)
+  0x0000: Version: 1  File: libm.so.6  Cnt: 3
+  0x0050:   Name: GLIBC_2.0  Flags: none  Version: 8
+  0x0060:   Name: GLIBC_2.1  Flags: none  Version: 7
+  0x0070:   Name: GLIBC_2.27  Flags: none  Version: 6
+  0x0010: Version: 1  File: libpthread.so.0  Cnt: 5
+  0x0080:   Name: GLIBC_2.0  Flags: none  Version: 4
+  0x0090:   Name: GLIBC_2.1  Flags: none  Version: 19
+  0x00a0:   Name: GLIBC_2.2  Flags: none  Version: 14
+  0x00b0:   Name: GLIBC_2.2.3  Flags: none  Version: 16
+  0x00c0:   Name: GLIBC_2.12  Flags: none  Version: 5
+  0x0020: Version: 1  File: libc.so.6  Cnt: 16
+  0x00d0:   Name: GLIBC_2.0  Flags: none  Version: 2
+  0x00e0:   Name: GLIBC_2.1  Flags: none  Version: 11
+  0x00f0:   Name: GLIBC_2.1.2  Flags: none  Version: 17
+  0x0100:   Name: GLIBC_2.2  Flags: none  Version: 3
+  0x0110:   Name: GLIBC_2.2.4  Flags: none  Version: 27
+  0x0120:   Name: GLIBC_2.3  Flags: none  Version: 10
+  0x0130:   Name: GLIBC_2.3.2  Flags: none  Version: 15
+  0x0140:   Name: GLIBC_2.3.4  Flags: none  Version: 18
+  0x0150:   Name: GLIBC_2.4  Flags: none  Version: 28
+  0x0160:   Name: GLIBC_2.9  Flags: none  Version: 23
+  0x0170:   Name: GLIBC_2.15  Flags: none  Version: 24
+  0x0180:   Name: GLIBC_2.16  Flags: none  Version: 20
+  0x0190:   Name: GLIBC_2.17  Flags: none  Version: 21
+  0x01a0:   Name: GLIBC_2.18  Flags: none  Version: 26
+  0x01b0:   Name: GLIBC_2.25  Flags: none  Version: 25
+  0x01c0:   Name: GLIBC_2.28  Flags: none  Version: 22
+  0x0030: Version: 1  File: libdl.so.2  Cnt: 2
+  0x01d0:   Name: GLIBC_2.0  Flags: none  Version: 12
+  0x01e0:   Name: GLIBC_2.1  Flags: none  Version: 13
+  0x0040: Version: 1  File: ld-linux.so.2  Cnt: 1
+  0x01f0:   Name: GLIBC_2.3  Flags: none  Version: 9
+

@@ -1,0 +1,50 @@
+name: Build and test
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { runner: windows-2022, target: x86_64-pc-windows-msvc, name: windows-x64 }
+          - { runner: windows-2022, target: i686-pc-windows-msvc, name: windows-x86 }
+          - { runner: windows-11-arm, target: aarch64-pc-windows-msvc, name: windows-arm64 }
+          - { runner: ubuntu-24.04, target: x86_64-unknown-linux-gnu, name: linux-x64 }
+          - { runner: ubuntu-24.04, target: i686-unknown-linux-gnu, name: linux-x86 }
+          - { runner: ubuntu-24.04-arm, target: aarch64-unknown-linux-gnu, name: linux-arm64 }
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: '1.90.0'
+          targets: ${{ matrix.target }}
+          components: rustfmt, clippy
+      - name: Linux dependencies
+        if: runner.os == 'Linux' && matrix.name != 'linux-x86'
+        run: sudo apt-get update && sudo apt-get install -y pkg-config libx11-dev libxkbcommon-dev libwayland-dev libegl1-mesa-dev libgl1-mesa-dev fonts-noto-cjk
+      - name: Linux x86 dependencies
+        if: matrix.name == 'linux-x86'
+        run: |
+          sudo dpkg --add-architecture i386
+          sudo apt-get update
+          sudo apt-get install -y gcc-multilib pkg-config libx11-dev:i386 libxkbcommon-dev:i386 libwayland-dev:i386 libegl1-mesa-dev:i386 libgl1-mesa-dev:i386 fonts-noto-cjk
+          echo 'PKG_CONFIG_ALLOW_CROSS=1' >> "$GITHUB_ENV"
+          echo 'PKG_CONFIG_LIBDIR=/usr/lib/i386-linux-gnu/pkgconfig:/usr/share/pkgconfig' >> "$GITHUB_ENV"
+      - run: cargo fmt --all -- --check
+      - run: cargo test --locked --target ${{ matrix.target }}
+      - run: cargo build --release --locked --target ${{ matrix.target }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.name }}
+          path: |
+            target/${{ matrix.target }}/release/jian-yue.exe
+            target/${{ matrix.target }}/release/jian-yue
+            README.md
+            LICENSE
+            docs/
+            samples/

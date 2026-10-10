@@ -1,0 +1,493 @@
+
+File: target/release/jian-yue.exe
+Format: COFF-x86-64
+Arch: x86_64
+AddressSize: 64bit
+ImageFileHeader {
+  Machine: IMAGE_FILE_MACHINE_AMD64 (0x8664)
+  SectionCount: 10
+  TimeDateStamp: 2026-10-10 10:58:05 (0x6ACA1A3D)
+  PointerToSymbolTable: 0x0
+  SymbolCount: 0
+  StringTableSize: 0
+  OptionalHeaderSize: 240
+  Characteristics [ (0x22E)
+    IMAGE_FILE_DEBUG_STRIPPED (0x200)
+    IMAGE_FILE_EXECUTABLE_IMAGE (0x2)
+    IMAGE_FILE_LARGE_ADDRESS_AWARE (0x20)
+    IMAGE_FILE_LINE_NUMS_STRIPPED (0x4)
+    IMAGE_FILE_LOCAL_SYMS_STRIPPED (0x8)
+  ]
+}
+ImageOptionalHeader {
+  Magic: 0x20B
+  MajorLinkerVersion: 2
+  MinorLinkerVersion: 47
+  SizeOfCode: 9442304
+  SizeOfInitializedData: 25593344
+  SizeOfUninitializedData: 1024
+  AddressOfEntryPoint: 0x1440
+  BaseOfCode: 0x1000
+  ImageBase: 0x140000000
+  SectionAlignment: 4096
+  FileAlignment: 512
+  MajorOperatingSystemVersion: 4
+  MinorOperatingSystemVersion: 0
+  MajorImageVersion: 0
+  MinorImageVersion: 0
+  MajorSubsystemVersion: 5
+  MinorSubsystemVersion: 2
+  SizeOfImage: 35061760
+  SizeOfHeaders: 1024
+  CheckSum: 0x2173306
+  Subsystem: IMAGE_SUBSYSTEM_WINDOWS_CUI (0x3)
+  Characteristics [ (0x160)
+    IMAGE_DLL_CHARACTERISTICS_DYNAMIC_BASE (0x40)
+    IMAGE_DLL_CHARACTERISTICS_HIGH_ENTROPY_VA (0x20)
+    IMAGE_DLL_CHARACTERISTICS_NX_COMPAT (0x100)
+  ]
+  SizeOfStackReserve: 2097152
+  SizeOfStackCommit: 4096
+  SizeOfHeapReserve: 1048576
+  SizeOfHeapCommit: 4096
+  NumberOfRvaAndSize: 16
+  DataDirectory {
+    ExportTableRVA: 0x0
+    ExportTableSize: 0x0
+    ImportTableRVA: 0x213E000
+    ImportTableSize: 0x2DB8
+    ResourceTableRVA: 0x2142000
+    ResourceTableSize: 0x1C208
+    ExceptionTableRVA: 0x20B6000
+    ExceptionTableSize: 0x1D994
+    CertificateTableRVA: 0x0
+    CertificateTableSize: 0x0
+    BaseRelocationTableRVA: 0x215F000
+    BaseRelocationTableSize: 0x1050C
+    DebugRVA: 0x0
+    DebugSize: 0x0
+    ArchitectureRVA: 0x0
+    ArchitectureSize: 0x0
+    GlobalPtrRVA: 0x0
+    GlobalPtrSize: 0x0
+    TLSTableRVA: 0x20B56C0
+    TLSTableSize: 0x28
+    LoadConfigTableRVA: 0x0
+    LoadConfigTableSize: 0x0
+    BoundImportRVA: 0x0
+    BoundImportSize: 0x0
+    IATRVA: 0x213EB28
+    IATSize: 0x970
+    DelayImportDescriptorRVA: 0x0
+    DelayImportDescriptorSize: 0x0
+    CLRRuntimeHeaderRVA: 0x0
+    CLRRuntimeHeaderSize: 0x0
+    ReservedRVA: 0x0
+    ReservedSize: 0x0
+  }
+}
+DOSHeader {
+  Magic: MZ
+  UsedBytesInTheLastPage: 144
+  FileSizeInPages: 3
+  NumberOfRelocationItems: 0
+  HeaderSizeInParagraphs: 4
+  MinimumExtraParagraphs: 0
+  MaximumExtraParagraphs: 65535
+  InitialRelativeSS: 0
+  InitialSP: 184
+  Checksum: 0
+  InitialIP: 0
+  InitialRelativeCS: 0
+  AddressOfRelocationTable: 64
+  OverlayNumber: 0
+  OEMid: 0
+  OEMinfo: 0
+  AddressOfNewExeHeader: 128
+}
+Import {
+  Name: bcryptprimitives.dll
+  ImportLookupTableRVA: 0x213E1B8
+  ImportAddressTableRVA: 0x213EB28
+  Symbol: ProcessPrng (0)
+}
+Import {
+  Name: api-ms-win-core-synch-l1-2-0.dll
+  ImportLookupTableRVA: 0x213E1C8
+  ImportAddressTableRVA: 0x213EB38
+  Symbol: WaitOnAddress (3)
+  Symbol: WakeByAddressAll (1)
+  Symbol: WakeByAddressSingle (2)
+}
+Import {
+  Name: combase.dll
+  ImportLookupTableRVA: 0x213E1E8
+  ImportAddressTableRVA: 0x213EB58
+  Symbol: CoTaskMemFree (3)
+}
+Import {
+  Name: ntdll.dll
+  ImportLookupTableRVA: 0x213E1F8
+  ImportAddressTableRVA: 0x213EB68
+  Symbol: RtlNtStatusToDosError (0)
+}
+Import {
+  Name: ole32.dll
+  ImportLookupTableRVA: 0x213E208
+  ImportAddressTableRVA: 0x213EB78
+  Symbol: CoCreateInstance (11)
+  Symbol: CoInitializeEx (41)
+  Symbol: CoUninitialize (73)
+}
+Import {
+  Name: shell32.dll
+  ImportLookupTableRVA: 0x213E228
+  ImportAddressTableRVA: 0x213EB98
+  Symbol: DragFinish (10)
+  Symbol: DragQueryFileW (12)
+  Symbol: SHCreateItemFromParsingName (63)
+  Symbol: ShellExecuteW (147)
+}
+Import {
+  Name: shlwapi.dll
+  ImportLookupTableRVA: 0x213E250
+  ImportAddressTableRVA: 0x213EBC0
+  Symbol: AssocQueryStringW (3)
+}
+Import {
+  Name: user32.dll
+  ImportLookupTableRVA: 0x213E260
+  ImportAddressTableRVA: 0x213EBD0
+  Symbol: AdjustWindowRectEx (2)
+  Symbol: ClipCursor (46)
+  Symbol: CreateIcon (59)
+  Symbol: CreateIconFromResourceEx (61)
+  Symbol: CreateWindowExW (67)
+  Symbol: DefWindowProcW (76)
+  Symbol: DestroyCursor (82)
+  Symbol: DestroyIcon (83)
+  Symbol: DestroyWindow (85)
+  Symbol: DispatchMessageW (92)
+  Symbol: EnableMenuItem (96)
+  Symbol: FlashWindowEx (113)
+  Symbol: GetActiveWindow (114)
+  Symbol: GetAsyncKeyState (118)
+  Symbol: GetClassNameW (128)
+  Symbol: GetClientRect (130)
+  Symbol: GetClipCursor (131)
+  Symbol: GetCursorPos (135)
+  Symbol: GetForegroundWindow (145)
+  Symbol: GetKeyState (151)
+  Symbol: GetKeyboardLayout (152)
+  Symbol: GetKeyboardState (156)
+  Symbol: GetMenu (161)
+  Symbol: GetRawInputData (187)
+  Symbol: GetSystemMenu (198)
+  Symbol: GetSystemMetrics (199)
+  Symbol: GetWindowLongPtrW (208)
+  Symbol: GetWindowLongW (209)
+  Symbol: GetWindowPlacement (212)
+  Symbol: GetWindowRect (213)
+  Symbol: GetWindowTextLengthW (216)
+  Symbol: GetWindowTextW (217)
+  Symbol: IsIconic (240)
+  Symbol: IsProcessDPIAware (242)
+  Symbol: LoadCursorW (256)
+  Symbol: MapVirtualKeyExW (276)
+  Symbol: MapVirtualKeyW (277)
+  Symbol: MsgWaitForMultipleObjectsEx (289)
+  Symbol: PeekMessageW (297)
+  Symbol: PostMessageW (300)
+  Symbol: RegisterRawInputDevices (313)
+  Symbol: RegisterWindowMessageA (315)
+  Symbol: ReleaseCapture (317)
+  Symbol: SendInput (325)
+  Symbol: SendMessageW (331)
+  Symbol: SetCapture (336)
+  Symbol: SetCursor (345)
+  Symbol: SetCursorPos (346)
+  Symbol: SetForegroundWindow (353)
+  Symbol: SetWindowDisplayAffinity (371)
+  Symbol: SetWindowLongPtrW (374)
+  Symbol: SetWindowLongW (375)
+  Symbol: SetWindowPlacement (376)
+  Symbol: SetWindowPos (377)
+  Symbol: SetWindowTextW (379)
+  Symbol: ShowCursor (386)
+  Symbol: ShowWindow (388)
+  Symbol: SystemParametersInfoA (393)
+  Symbol: ToUnicodeEx (399)
+  Symbol: TrackMouseEvent (400)
+  Symbol: TranslateMessage (406)
+}
+Import {
+  Name: comdlg32.dll
+  ImportLookupTableRVA: 0x213E450
+  ImportAddressTableRVA: 0x213EDC0
+  Symbol: CommDlgExtendedError (4)
+  Symbol: PrintDlgW (18)
+}
+Import {
+  Name: dwmapi.dll
+  ImportLookupTableRVA: 0x213E468
+  ImportAddressTableRVA: 0x213EDD8
+  Symbol: DwmEnableBlurBehindWindow (3)
+  Symbol: DwmSetWindowAttribute (25)
+}
+Import {
+  Name: imm32.dll
+  ImportLookupTableRVA: 0x213E480
+  ImportAddressTableRVA: 0x213EDF0
+  Symbol: ImmAssociateContextEx (1)
+  Symbol: ImmGetCompositionStringW (27)
+  Symbol: ImmGetContext (29)
+  Symbol: ImmReleaseContext (63)
+  Symbol: ImmSetCandidateWindow (66)
+  Symbol: ImmSetCompositionWindow (71)
+}
+Import {
+  Name: ntdll.dll
+  ImportLookupTableRVA: 0x213E4B8
+  ImportAddressTableRVA: 0x213EE28
+  Symbol: NtOpenFile (67)
+  Symbol: NtReadFile (121)
+  Symbol: NtWriteFile (160)
+}
+Import {
+  Name: ole32.dll
+  ImportLookupTableRVA: 0x213E4D8
+  ImportAddressTableRVA: 0x213EE48
+  Symbol: OleInitialize (244)
+  Symbol: RegisterDragDrop (274)
+  Symbol: RevokeDragDrop (276)
+}
+Import {
+  Name: uxtheme.dll
+  ImportLookupTableRVA: 0x213E4F8
+  ImportAddressTableRVA: 0x213EE68
+  Symbol: SetWindowTheme (74)
+}
+Import {
+  Name: ADVAPI32.dll
+  ImportLookupTableRVA: 0x213E508
+  ImportAddressTableRVA: 0x213EE78
+  Symbol: ImpersonateAnonymousToken (1394)
+  Symbol: RevertToSelf (1716)
+}
+Import {
+  Name: GDI32.dll
+  ImportLookupTableRVA: 0x213E520
+  ImportAddressTableRVA: 0x213EE90
+  Symbol: AbortDoc (1)
+  Symbol: ChoosePixelFormat (26)
+  Symbol: CreateRectRgn (84)
+  Symbol: DeleteDC (385)
+  Symbol: DeleteObject (388)
+  Symbol: DescribePixelFormat (389)
+  Symbol: EndDoc (399)
+  Symbol: EndPage (402)
+  Symbol: GetDeviceCaps (637)
+  Symbol: SetPixelFormat (907)
+  Symbol: SetStretchBltMode (913)
+  Symbol: StartDocW (927)
+  Symbol: StartPage (929)
+  Symbol: StretchDIBits (931)
+  Symbol: SwapBuffers (934)
+}
+Import {
+  Name: KERNEL32.dll
+  ImportLookupTableRVA: 0x213E5A0
+  ImportAddressTableRVA: 0x213EF10
+  Symbol: AddVectoredExceptionHandler (21)
+  Symbol: CancelIo (131)
+  Symbol: CloseHandle (152)
+  Symbol: CompareStringOrdinal (173)
+  Symbol: CreateEventW (212)
+  Symbol: CreateFileMappingA (217)
+  Symbol: CreateFileMappingW (221)
+  Symbol: CreateFileW (224)
+  Symbol: CreateProcessW (251)
+  Symbol: CreateThread (264)
+  Symbol: CreateToolhelp32Snapshot (273)
+  Symbol: CreateWaitableTimerExW (278)
+  Symbol: DeleteCriticalSection (296)
+  Symbol: DuplicateHandle (326)
+  Symbol: EnterCriticalSection (334)
+  Symbol: ExitProcess (381)
+  Symbol: FindClose (404)
+  Symbol: FindFirstFileExW (410)
+  Symbol: FindNextFileW (427)
+  Symbol: FormatMessageW (455)
+  Symbol: FreeConsole (456)
+  Symbol: FreeEnvironmentStringsW (458)
+  Symbol: FreeLibrary (459)
+  Symbol: GetCommandLineW (504)
+  Symbol: GetConsoleMode (541)
+  Symbol: GetConsoleOutputCP (545)
+  Symbol: GetCurrentDirectoryW (562)
+  Symbol: GetCurrentProcess (569)
+  Symbol: GetCurrentThread (573)
+  Symbol: GetCurrentThreadId (574)
+  Symbol: GetEnvironmentStringsW (604)
+  Symbol: GetEnvironmentVariableW (606)
+  Symbol: GetExitCodeProcess (609)
+  Symbol: GetFileAttributesW (620)
+  Symbol: GetFileInformationByHandle (622)
+  Symbol: GetFileInformationByHandleEx (623)
+  Symbol: GetFinalPathNameByHandleW (632)
+  Symbol: GetFullPathNameW (641)
+  Symbol: GetLastError (649)
+  Symbol: GetModuleFileNameW (670)
+  Symbol: GetModuleHandleA (671)
+  Symbol: GetModuleHandleW (674)
+  Symbol: GetOverlappedResult (709)
+  Symbol: GetProcAddress (731)
+  Symbol: GetProcessHeap (738)
+  Symbol: GetStdHandle (769)
+  Symbol: GetSystemDirectoryW (783)
+  Symbol: GetSystemInfo (786)
+  Symbol: GetSystemTimePreciseAsFileTime (793)
+  Symbol: GetWindowsDirectoryW (859)
+  Symbol: GlobalAlloc (866)
+  Symbol: GlobalFree (873)
+  Symbol: GlobalLock (877)
+  Symbol: GlobalSize (881)
+  Symbol: GlobalUnlock (884)
+  Symbol: HeapAlloc (890)
+  Symbol: HeapFree (896)
+  Symbol: HeapReAlloc (900)
+  Symbol: InitOnceBeginInitialize (912)
+  Symbol: InitOnceComplete (913)
+  Symbol: InitializeCriticalSection (919)
+  Symbol: LeaveCriticalSection (1013)
+  Symbol: LoadLibraryA (1017)
+  Symbol: LoadLibraryExW (1019)
+  Symbol: LoadLibraryW (1020)
+  Symbol: MapViewOfFile (1048)
+  Symbol: Module32FirstW (1053)
+  Symbol: Module32NextW (1055)
+  Symbol: MultiByteToWideChar (1065)
+  Symbol: QueryPerformanceCounter (1162)
+  Symbol: QueryPerformanceFrequency (1163)
+  Symbol: RaiseException (1185)
+  Symbol: ReadFile (1202)
+  Symbol: ReadFileEx (1203)
+  Symbol: RtlCaptureContext (1257)
+  Symbol: RtlLookupFunctionEntry (1265)
+  Symbol: RtlUnwindEx (1271)
+  Symbol: RtlVirtualUnwind (1272)
+  Symbol: SetFileInformationByHandle (1353)
+  Symbol: SetFilePointerEx (1356)
+  Symbol: SetLastError (1371)
+  Symbol: SetThreadErrorMode (1410)
+  Symbol: SetThreadStackGuarantee (1422)
+  Symbol: SetUnhandledExceptionFilter (1434)
+  Symbol: SetWaitableTimer (1443)
+  Symbol: Sleep (1450)
+  Symbol: SleepEx (1453)
+  Symbol: SwitchToThread (1461)
+  Symbol: TlsAlloc (1484)
+  Symbol: TlsFree (1485)
+  Symbol: TlsGetValue (1486)
+  Symbol: TlsSetValue (1488)
+  Symbol: UnmapViewOfFile (1504)
+  Symbol: VirtualProtect (1534)
+  Symbol: VirtualQuery (1536)
+  Symbol: WaitForMultipleObjects (1543)
+  Symbol: WaitForSingleObject (1545)
+  Symbol: WideCharToMultiByte (1589)
+  Symbol: WriteConsoleW (1608)
+  Symbol: WriteFileEx (1610)
+  Symbol: __C_specific_handler (1626)
+}
+Import {
+  Name: msvcrt.dll
+  ImportLookupTableRVA: 0x213E8D0
+  ImportAddressTableRVA: 0x213F240
+  Symbol: __getmainargs (128)
+  Symbol: __initenv (129)
+  Symbol: __iob_func (130)
+  Symbol: __set_app_type (146)
+  Symbol: __setusermatherr (149)
+  Symbol: _amsg_exit (182)
+  Symbol: _cexit (203)
+  Symbol: _commode (223)
+  Symbol: _errno (272)
+  Symbol: _exit (298)
+  Symbol: _fmode (324)
+  Symbol: _fpreset (329)
+  Symbol: _hypot (404)
+  Symbol: _initterm (411)
+  Symbol: atexit (1144)
+  Symbol: abort (1134)
+  Symbol: acos (1137)
+  Symbol: calloc (1152)
+  Symbol: exit (1166)
+  Symbol: exp (1167)
+  Symbol: fflush (1173)
+  Symbol: fprintf (1187)
+  Symbol: free (1194)
+  Symbol: frexp (1198)
+  Symbol: ldexp (1249)
+  Symbol: log10 (1254)
+  Symbol: malloc (1258)
+  Symbol: memcmp (1266)
+  Symbol: memcpy (1267)
+  Symbol: memmove (1268)
+  Symbol: memset (1269)
+  Symbol: setvbuf (1301)
+  Symbol: signal (1302)
+  Symbol: strerror (1323)
+  Symbol: strlen (1325)
+  Symbol: strncmp (1328)
+  Symbol: tan (1347)
+  Symbol: vfprintf (1361)
+}
+Import {
+  Name: ntdll.dll
+  ImportLookupTableRVA: 0x213EA08
+  ImportAddressTableRVA: 0x213F378
+  Symbol: NtCreateNamedPipeFile (330)
+}
+Import {
+  Name: OPENGL32.dll
+  ImportLookupTableRVA: 0x213EA18
+  ImportAddressTableRVA: 0x213F388
+  Symbol: wglCreateContext (346)
+  Symbol: wglDeleteContext (348)
+  Symbol: wglGetCurrentContext (351)
+  Symbol: wglGetCurrentDC (352)
+  Symbol: wglGetProcAddress (356)
+  Symbol: wglMakeCurrent (357)
+  Symbol: wglShareLists (361)
+}
+Import {
+  Name: USER32.dll
+  ImportLookupTableRVA: 0x213EA58
+  ImportAddressTableRVA: 0x213F3C8
+  Symbol: ChangeDisplaySettingsExW (40)
+  Symbol: ClientToScreen (76)
+  Symbol: CloseClipboard (78)
+  Symbol: CloseTouchInputHandle (81)
+  Symbol: EmptyClipboard (232)
+  Symbol: EnumDisplayMonitors (253)
+  Symbol: GetClassInfoExW (297)
+  Symbol: GetClipboardData (309)
+  Symbol: GetDC (321)
+  Symbol: GetMonitorInfoW (393)
+  Symbol: GetTouchInputInfo (459)
+  Symbol: InvalidateRgn (534)
+  Symbol: IsClipboardFormatAvailable (545)
+  Symbol: MonitorFromPoint (634)
+  Symbol: MonitorFromRect (635)
+  Symbol: MonitorFromWindow (636)
+  Symbol: OpenClipboard (648)
+  Symbol: RedrawWindow (706)
+  Symbol: RegisterClassExW (710)
+  Symbol: RegisterClipboardFormatW (713)
+  Symbol: RegisterTouchWindow (737)
+  Symbol: ReleaseDC (742)
+  Symbol: ScreenToClient (752)
+  Symbol: SetClipboardData (780)
+  Symbol: ValidateRect (954)
+}

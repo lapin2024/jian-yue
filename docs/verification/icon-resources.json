@@ -1,0 +1,44 @@
+{
+  "windows-x64": {
+    "product_name": "\u7b80\u9605",
+    "machine": 34404,
+    "icon_count": 6,
+    "sizes": [
+      32,
+      48,
+      64,
+      96,
+      128,
+      256
+    ],
+    "original_png_bytes_preserved": true
+  },
+  "windows-x86": {
+    "product_name": "\u7b80\u9605",
+    "machine": 332,
+    "icon_count": 6,
+    "sizes": [
+      32,
+      48,
+      64,
+      96,
+      128,
+      256
+    ],
+    "original_png_bytes_preserved": true
+  },
+  "windows-arm64": {
+    "product_name": "\u7b80\u9605",
+    "machine": 43620,
+    "icon_count": 6,
+    "sizes": [
+      32,
+      48,
+      64,
+      96,
+      128,
+      256
+    ],
+    "original_png_bytes_preserved": true
+  }
+}

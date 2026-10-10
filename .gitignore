@@ -1,0 +1,18 @@
+/target/
+/tools/cargo/
+/tools/rustup/
+/tools/llvm-mingw*/
+/tools/mingw*/
+/tools/zig*/
+/tools/*.7z
+/tools/*.exe
+/tools/*.zip
+/tmp/
+/dist/
+
+
+__pycache__/
+*.pyc
+
+# Local compilers, dependency caches, publishing tools and credentials
+/tools/

@@ -1,0 +1,59 @@
+[package]
+name = "ofd-reader"
+version = "0.3.0"
+edition = "2024"
+rust-version = "1.90"
+description = "A cross-platform OFD and PDF document reader"
+license = "MIT"
+repository = "https://github.com/lapin2024/jian-yue"
+homepage = "https://github.com/lapin2024/jian-yue"
+
+[features]
+default = ["desktop"]
+desktop = ["dep:eframe", "dep:rfd"]
+
+[dependencies]
+anyhow = "1.0"
+zip = { version = "2.4", default-features = false, features = ["deflate"] }
+roxmltree = "0.20"
+tiny-skia = "0.11"
+ttf-parser = "0.25"
+fontdb = "0.23"
+image = { version = "0.25", default-features = false, features = ["png", "jpeg", "bmp", "tiff"] }
+svgtypes = "0.15"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+eframe = { version = "0.33", optional = true, default-features = false, features = ["default_fonts", "glow", "x11", "wayland"] }
+rfd = { version = "0.15", optional = true, default-features = false, features = ["xdg-portal", "tokio"] }
+
+hayro = "=0.4.0"
+pdf-writer = "0.14"
+lopdf = {version="0.38", default-features=false}
+flate2 = "1.1"
+tempfile = "3.23"
+
+sha2 = {version="0.10",features=["oid"]}
+rsa = {version="0.9",features=["sha2"]}
+p12-keystore = "=0.1.5"
+cms = {version="0.2.3",features=["std"]}
+x509-cert = "0.2.5"
+der = {version="0.7",features=["alloc","std"]}
+const-oid = {version="0.9",features=["db"]}
+spki = "0.7"
+zeroize = "1.8"
+hex = "0.4"
+
+[target.'cfg(windows)'.dependencies]
+windows-sys = {version="0.59",features=["Win32_Foundation","Win32_UI_Controls_Dialogs","Win32_Graphics_Gdi","Win32_Graphics_Printing","Win32_System_Memory","Win32_Storage_Xps","Win32_UI_Shell","Win32_System_SystemInformation"]}
+
+[build-dependencies]
+embed-resource = "=3.0.6"
+
+[profile.release]
+lto = "thin"
+strip = true
+codegen-units = 1
+
+[[bin]]
+name = "jian-yue"
+path = "src/main.rs"

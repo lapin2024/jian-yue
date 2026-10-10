@@ -1,0 +1,70 @@
+{
+  "version": 1,
+  "source_sha256": "bd035a38ec882091eecaf8db858170ef3036a83746d322e417fcc7c3a0ef17d4",
+  "pages": [
+    {
+      "source": 0,
+      "turns": 0,
+      "marks": [
+        {
+          "kind": "highlight",
+          "rect": {
+            "x": 20,
+            "y": 60,
+            "w": 123,
+            "h": 14
+          },
+          "color": [
+            255,
+            210,
+            40,
+            70
+          ]
+        },
+        {
+          "kind": "text",
+          "rect": {
+            "x": 20,
+            "y": 175,
+            "w": 130,
+            "h": 17
+          },
+          "text": "新增文字批注：支持保存、修改与撤销。",
+          "size": 4,
+          "color": [
+            195,
+            40,
+            40,
+            255
+          ]
+        },
+        {
+          "kind": "rectangle",
+          "rect": {
+            "x": 18,
+            "y": 171,
+            "w": 140,
+            "h": 26
+          },
+          "color": [
+            195,
+            40,
+            40,
+            255
+          ],
+          "width": 0.6
+        }
+      ]
+    },
+    {
+      "source": 1,
+      "turns": 0,
+      "marks": []
+    },
+    {
+      "source": 2,
+      "turns": 0,
+      "marks": []
+    }
+  ]
+}

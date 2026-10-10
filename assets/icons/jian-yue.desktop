@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=简阅
+Name[zh_CN]=简阅
+Comment=OFD and PDF document reader
+Exec=jian-yue %f
+Icon=jian-yue
+Terminal=false
+Categories=Office;Viewer;
+MimeType=application/pdf;application/ofd;application/x-ofd;

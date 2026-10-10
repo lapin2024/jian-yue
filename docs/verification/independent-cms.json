@@ -1,0 +1,18 @@
+{
+  "tool": "OpenSSL CMS verifier",
+  "test_identity_only": true,
+  "checks": [
+    {
+      "type": "pdf",
+      "signature_integrity_verified": true,
+      "certificate_chain_verified": false,
+      "message": "CMS Verification successful"
+    },
+    {
+      "type": "ofd",
+      "signature_integrity_verified": true,
+      "certificate_chain_verified": false,
+      "message": "CMS Verification successful"
+    }
+  ]
+}

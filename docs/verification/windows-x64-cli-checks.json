@@ -1,0 +1,381 @@
+{
+  "binary": "windows-x64/简阅.exe",
+  "binary_sha256": "3758b7727c8220247d06fb30bb099c7b15035a1571e46f223d486c1194f4a5e4",
+  "source_sha256": "aebd14c87c1c8c45facc69872f02eb06bc20095055014bbb4dd1819a531d308f",
+  "pdf_source_sha256": "bd035a38ec882091eecaf8db858170ef3036a83746d322e417fcc7c3a0ef17d4",
+  "system_fonts_disabled": true,
+  "checks": [
+    {
+      "args": [
+        "--inspect",
+        "${PROJECT_DIR}\\samples\\demo.ofd",
+        "--output",
+        "${PROJECT_DIR}\\tmp\\verification\\windows-x64\\report.json"
+      ],
+      "exit_code": 0,
+      "stderr": ""
+    },
+    {
+      "args": [
+        "--render",
+        "${PROJECT_DIR}\\samples\\demo.ofd",
+        "--page",
+        "1",
+        "--zoom",
+        "1",
+        "--output",
+        "${PROJECT_DIR}\\tmp\\verification\\windows-x64\\page1.png"
+      ],
+      "exit_code": 0,
+      "stderr": ""
+    },
+    {
+      "args": [
+        "--render",
+        "${PROJECT_DIR}\\samples\\demo.ofd",
+        "--page",
+        "2",
+        "--zoom",
+        "1",
+        "--rotate",
+        "90",
+        "--output",
+        "${PROJECT_DIR}\\tmp\\verification\\windows-x64\\page2-rotated.png"
+      ],
+      "exit_code": 0,
+      "stderr": ""
+    },
+    {
+      "args": [
+        "--text",
+        "${PROJECT_DIR}\\samples\\demo.ofd",
+        "--output",
+        "${PROJECT_DIR}\\tmp\\verification\\windows-x64\\text.txt"
+      ],
+      "exit_code": 0,
+      "stderr": ""
+    },
+    {
+      "args": [
+        "--extract-attachment",
+        "${PROJECT_DIR}\\samples\\demo.ofd",
+        "--attachment",
+        "1",
+        "--output",
+        "${PROJECT_DIR}\\tmp\\verification\\windows-x64\\attachment.txt"
+      ],
+      "exit_code": 0,
+      "stderr": ""
+    },
+    {
+      "args": [
+        "--render",
+        "${PROJECT_DIR}\\samples\\demo.ofd",
+        "--page",
+        "0",
+        "--output",
+        "${PROJECT_DIR}\\tmp\\verification\\windows-x64\\invalid.png"
+      ],
+      "exit_code": 1,
+      "stderr": "简阅: 页码从 1 开始\n"
+    },
+    {
+      "args": [
+        "--render",
+        "${PROJECT_DIR}\\samples\\demo.ofd",
+        "--page",
+        "99",
+        "--output",
+        "${PROJECT_DIR}\\tmp\\verification\\windows-x64\\invalid.png"
+      ],
+      "exit_code": 1,
+      "stderr": "简阅: 页码超过文档范围\n"
+    },
+    {
+      "args": [
+        "--inspect",
+        "${PROJECT_DIR}\\samples\\demo.ofd",
+        "--output",
+        "${PROJECT_DIR}\\samples\\demo.ofd"
+      ],
+      "exit_code": 1,
+      "stderr": "简阅: 导出路径不能是原始 OFD 文件，请选择其他文件名\n"
+    },
+    {
+      "args": [
+        "--render",
+        "${PROJECT_DIR}\\samples\\demo.ofd",
+        "--rotate",
+        "12",
+        "--output",
+        "${PROJECT_DIR}\\tmp\\verification\\windows-x64\\invalid.png"
+      ],
+      "exit_code": 1,
+      "stderr": "简阅: 旋转角度必须是 90 的倍数\n"
+    },
+    {
+      "args": [
+        "--inspect",
+        "${PROJECT_DIR}\\samples\\demo.pdf",
+        "--output",
+        "${PROJECT_DIR}\\tmp\\verification\\windows-x64\\pdf-report.json"
+      ],
+      "exit_code": 0,
+      "stderr": ""
+    },
+    {
+      "args": [
+        "--render",
+        "${PROJECT_DIR}\\samples\\demo.pdf",
+        "--output",
+        "${PROJECT_DIR}\\tmp\\verification\\windows-x64\\pdf-page1.png"
+      ],
+      "exit_code": 0,
+      "stderr": ""
+    },
+    {
+      "args": [
+        "--text",
+        "${PROJECT_DIR}\\samples\\demo.pdf",
+        "--output",
+        "${PROJECT_DIR}\\tmp\\verification\\windows-x64\\pdf-text.txt"
+      ],
+      "exit_code": 0,
+      "stderr": ""
+    },
+    {
+      "args": [
+        "--render",
+        "${PROJECT_DIR}\\samples\\demo.pdf",
+        "--page",
+        "2",
+        "--rotate",
+        "90",
+        "--output",
+        "${PROJECT_DIR}\\tmp\\verification\\windows-x64\\pdf-rotated.png"
+      ],
+      "exit_code": 0,
+      "stderr": ""
+    },
+    {
+      "args": [
+        "--print-pdf",
+        "${PROJECT_DIR}\\samples\\demo.ofd",
+        "--pages",
+        "1,3",
+        "--dpi",
+        "96",
+        "--output",
+        "${PROJECT_DIR}\\tmp\\verification\\windows-x64\\ofd-print.pdf"
+      ],
+      "exit_code": 0,
+      "stderr": ""
+    },
+    {
+      "args": [
+        "--print-pdf",
+        "${PROJECT_DIR}\\samples\\demo.pdf",
+        "--pages",
+        "2-3",
+        "--dpi",
+        "96",
+        "--output",
+        "${PROJECT_DIR}\\tmp\\verification\\windows-x64\\pdf-print.pdf"
+      ],
+      "exit_code": 0,
+      "stderr": ""
+    },
+    {
+      "args": [
+        "--inspect",
+        "${PROJECT_DIR}\\tmp\\verification\\windows-x64\\pdf-print.pdf"
+      ],
+      "exit_code": 0,
+      "stderr": ""
+    },
+    {
+      "args": [
+        "--print-pdf",
+        "${PROJECT_DIR}\\samples\\demo.pdf",
+        "--pages",
+        "0",
+        "--output",
+        "${PROJECT_DIR}\\tmp\\verification\\windows-x64\\bad-print.pdf"
+      ],
+      "exit_code": 1,
+      "stderr": "简阅: 页码范围无效，应位于 1 至 3 之间\n"
+    },
+    {
+      "args": [
+        "--convert",
+        "${PROJECT_DIR}\\samples\\demo.pdf",
+        "--pages",
+        "1-2",
+        "--dpi",
+        "96",
+        "--output",
+        "${PROJECT_DIR}\\tmp\\verification\\windows-x64\\converted.ofd"
+      ],
+      "exit_code": 0,
+      "stderr": ""
+    },
+    {
+      "args": [
+        "--inspect",
+        "${PROJECT_DIR}\\tmp\\verification\\windows-x64\\converted.ofd"
+      ],
+      "exit_code": 0,
+      "stderr": ""
+    },
+    {
+      "args": [
+        "--convert",
+        "${PROJECT_DIR}\\samples\\demo.ofd",
+        "--dpi",
+        "96",
+        "--output",
+        "${PROJECT_DIR}\\tmp\\verification\\windows-x64\\converted.pdf"
+      ],
+      "exit_code": 0,
+      "stderr": ""
+    },
+    {
+      "args": [
+        "--convert",
+        "${PROJECT_DIR}\\samples\\demo.pdf",
+        "--pages",
+        "1,3",
+        "--dpi",
+        "96",
+        "--output",
+        "${PROJECT_DIR}\\tmp\\verification\\windows-x64\\pages.zip"
+      ],
+      "exit_code": 0,
+      "stderr": ""
+    },
+    {
+      "args": [
+        "--render",
+        "${PROJECT_DIR}\\samples\\demo.pdf",
+        "--project",
+        "${PROJECT_DIR}\\samples\\demo.reader.json",
+        "--output",
+        "${PROJECT_DIR}\\tmp\\verification\\windows-x64\\edited.png"
+      ],
+      "exit_code": 0,
+      "stderr": ""
+    },
+    {
+      "args": [
+        "--text",
+        "${PROJECT_DIR}\\samples\\demo.pdf",
+        "--project",
+        "${PROJECT_DIR}\\samples\\demo.reader.json",
+        "--output",
+        "${PROJECT_DIR}\\tmp\\verification\\windows-x64\\edited.txt"
+      ],
+      "exit_code": 0,
+      "stderr": ""
+    },
+    {
+      "args": [
+        "--convert",
+        "${PROJECT_DIR}\\samples\\demo.pdf",
+        "--project",
+        "${PROJECT_DIR}\\samples\\demo.reader.json",
+        "--dpi",
+        "96",
+        "--output",
+        "${PROJECT_DIR}\\tmp\\verification\\windows-x64\\edited.ofd"
+      ],
+      "exit_code": 0,
+      "stderr": ""
+    },
+    {
+      "args": [
+        "--convert",
+        "${PROJECT_DIR}\\samples\\demo.ofd",
+        "--output",
+        "${PROJECT_DIR}\\tmp\\verification\\windows-x64\\invalid.docx"
+      ],
+      "exit_code": 1,
+      "stderr": "简阅: 输出应为 .pdf/.ofd/.zip\n"
+    },
+    {
+      "args": [
+        "--sign",
+        "${PROJECT_DIR}\\samples\\demo.pdf",
+        "--certificate",
+        "${PROJECT_DIR}\\tests\\fixtures\\test-identity.p12",
+        "--output",
+        "${PROJECT_DIR}\\tmp\\verification\\windows-x64\\signed.pdf"
+      ],
+      "exit_code": 0,
+      "stderr": ""
+    },
+    {
+      "args": [
+        "--verify-signature",
+        "${PROJECT_DIR}\\tmp\\verification\\windows-x64\\signed.pdf"
+      ],
+      "exit_code": 0,
+      "stderr": ""
+    },
+    {
+      "args": [
+        "--sign",
+        "${PROJECT_DIR}\\samples\\demo.ofd",
+        "--certificate",
+        "${PROJECT_DIR}\\tests\\fixtures\\test-identity.p12",
+        "--detached",
+        "--output",
+        "${PROJECT_DIR}\\tmp\\verification\\windows-x64\\document.p7s"
+      ],
+      "exit_code": 0,
+      "stderr": ""
+    },
+    {
+      "args": [
+        "--verify-signature",
+        "${PROJECT_DIR}\\samples\\demo.ofd",
+        "--signature",
+        "${PROJECT_DIR}\\tmp\\verification\\windows-x64\\document.p7s"
+      ],
+      "exit_code": 0,
+      "stderr": ""
+    },
+    {
+      "args": [
+        "--verify-signature",
+        "${PROJECT_DIR}\\samples\\demo.pdf",
+        "--signature",
+        "${PROJECT_DIR}\\tmp\\verification\\windows-x64\\document.p7s"
+      ],
+      "exit_code": 1,
+      "stderr": "简阅: 签名不匹配，文件已被修改或签名无效: signature error: verification error: verification error\n"
+    },
+    {
+      "args": [
+        "--sign",
+        "${PROJECT_DIR}\\tmp\\verification\\windows-x64\\signed.pdf",
+        "--certificate",
+        "${PROJECT_DIR}\\tests\\fixtures\\test-identity.p12",
+        "--output",
+        "${PROJECT_DIR}\\tmp\\verification\\windows-x64\\signed-again.pdf"
+      ],
+      "exit_code": 1,
+      "stderr": "简阅: PDF 已有数字签名，不能通过重写添加签名；请使用支持增量多重签名的软件\n"
+    },
+    {
+      "args": [
+        "--convert",
+        "${PROJECT_DIR}\\samples\\demo.pdf",
+        "--output",
+        "${PROJECT_DIR}\\samples\\demo.pdf"
+      ],
+      "exit_code": 1,
+      "stderr": "简阅: 导出路径不能是原始 OFD 文件，请选择其他文件名\n"
+    }
+  ],
+  "all_passed": true
+}
