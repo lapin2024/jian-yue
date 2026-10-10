@@ -16,3 +16,6 @@ __pycache__/
 
 # Local compilers, dependency caches, publishing tools and credentials
 /tools/
+
+# Local-only helper scripts (verification, inspection, sample generation)
+/scripts/*.py

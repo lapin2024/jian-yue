@@ -67,7 +67,7 @@ cargo clippy --all-targets --locked -- -D warnings
 cargo test --locked
 ```
 
-依赖升级应先检查 Rust 最低版本、目标架构、字体和图片解析库的行为差异，并重跑像素测试。示例包用 scripts/make_sample.py 生成；Pillow 是该辅助脚本的依赖，不是阅读器运行依赖。程序本身无 Python 依赖。
+依赖升级应先检查 Rust 最低版本、目标架构、字体和图片解析库的行为差异，并重跑像素测试。示例包 samples/demo.ofd 与 samples/demo.pdf 已随仓库提交。程序本身无 Python 依赖。
 
 ## 外部样本
 
