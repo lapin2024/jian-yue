@@ -204,6 +204,346 @@ fn renders_vectors_at_physical_coordinates() {
     assert_eq!(pixel(&r.pixmap, 3., 3.), [255, 255, 255, 255]);
     assert!(r.warnings.is_empty());
 }
+
+fn gradient_object(shading: &str, attrs: &str) -> String {
+    red_path().replace(
+        r#"<FillColor Value="255 0 0"/>"#,
+        &format!("<FillColor {attrs}>{shading}</FillColor>"),
+    )
+}
+fn axial(attrs: &str, segments: &str) -> String {
+    format!("<AxialShd {attrs}>{segments}</AxialShd>")
+}
+fn red_blue() -> &'static str {
+    r##"<Segment><Color Value="#FF 0 0"/></Segment><Segment><Color Value="0 0 #FF"/></Segment>"##
+}
+fn render_fixture(objects: &str, resources: &str) -> tiny_skia::Pixmap {
+    let doc = parser::from_bytes(&fixture(objects, "", resources, &[])).unwrap();
+    let rendered = Renderer::with_system_fonts(false)
+        .render(&doc.pages[0], 1., 0)
+        .unwrap();
+    assert!(rendered.warnings.is_empty(), "{:?}", rendered.warnings);
+    rendered.pixmap
+}
+
+#[test]
+fn axial_gradient_uses_object_coordinates_and_hex_colors() {
+    let object = gradient_object(
+        &axial(r#"StartPoint="0 5" EndPoint="10 5" Extend="3""#, red_blue()),
+        "",
+    );
+    let pixmap = render_fixture(&object, "");
+    let left = pixel(&pixmap, 6., 10.);
+    let right = pixel(&pixmap, 14., 10.);
+    assert!(left[0] as u16 > left[2] as u16 * 4, "{left:?}");
+    assert!(right[2] as u16 > right[0] as u16 * 4, "{right:?}");
+    assert_eq!(pixel(&pixmap, 3., 3.), [255, 255, 255, 255]);
+    let doc = parser::from_bytes(&fixture(&object, "", "", &[])).unwrap();
+    assert!(!doc.issues.iter().any(|i| i.message.contains("渐变")));
+}
+
+#[test]
+fn gradients_follow_ctm_and_page_rotation() {
+    let object = gradient_object(
+        &axial(r#"StartPoint="0 5" EndPoint="5 5" Extend="3""#, red_blue()),
+        "",
+    )
+    .replace("Fill=\"true\"", "CTM=\"2 0 0 1 0 0\" Fill=\"true\"");
+    let doc = parser::from_bytes(&fixture(&object, "", "", &[])).unwrap();
+    let mut renderer = Renderer::with_system_fonts(false);
+    let regular = renderer.render(&doc.pages[0], 1., 0).unwrap();
+    let rotated = renderer.render(&doc.pages[0], 1., 90).unwrap();
+    assert!(pixel(&regular.pixmap, 6., 10.)[0] > 200);
+    assert!(pixel(&regular.pixmap, 14., 10.)[2] > 200);
+    assert!(pixel(&rotated.pixmap, 20., 6.)[0] > 200);
+    assert!(pixel(&rotated.pixmap, 20., 14.)[2] > 200);
+}
+
+#[test]
+fn missing_segment_positions_are_interpolated_between_explicit_stops() {
+    let segments = r#"<Segment><Color Value="255 0 0"/></Segment><Segment><Color Value="0 255 0"/></Segment><Segment Position="0.4"><Color Value="0 0 255"/></Segment><Segment><Color Value="255 255 255"/></Segment>"#;
+    let object = gradient_object(
+        &axial(r#"StartPoint="0 0" EndPoint="10 0" Extend="3""#, segments),
+        "",
+    );
+    let doc = parser::from_bytes(&fixture(&object, "", "", &[])).unwrap();
+    let Some(FillShader::Linear { stops, .. }) = &doc.pages[0].objects[0].style.fill_shader else {
+        panic!("missing gradient");
+    };
+    assert_eq!(
+        stops.iter().map(|s| s.position).collect::<Vec<_>>(),
+        vec![0., 0.2, 0.4, 1.]
+    );
+    assert!(pixel(&render_fixture(&object, ""), 7., 10.)[1] > 230);
+}
+
+#[test]
+fn gradient_extend_limits_the_axis_without_clipping_the_stroke() {
+    for extend in 0..=3 {
+        let shader = axial(
+            &format!("StartPoint=\"3 5\" EndPoint=\"7 5\" Extend=\"{extend}\""),
+            red_blue(),
+        );
+        let object = gradient_object(&shader, "");
+        let pixmap = render_fixture(&object, "");
+        assert_eq!(
+            pixel(&pixmap, 6., 10.) == [255, 255, 255, 255],
+            extend & 1 == 0
+        );
+        assert_eq!(
+            pixel(&pixmap, 14., 10.) == [255, 255, 255, 255],
+            extend & 2 == 0
+        );
+        assert!(pixel(&pixmap, 10., 10.)[1] < 10);
+    }
+}
+
+#[test]
+fn repeating_and_reflected_gradients_obey_map_unit() {
+    for mode in ["Repeat", "Reflect"] {
+        let object = gradient_object(
+            &axial(
+                &format!(
+                    "StartPoint=\"0 0\" EndPoint=\"10 0\" MapType=\"{mode}\" MapUnit=\"2\" Extend=\"3\""
+                ),
+                red_blue(),
+            ),
+            "",
+        );
+        let pixmap = render_fixture(&object, "");
+        let first = pixel(&pixmap, 5.5, 10.);
+        let second = pixel(&pixmap, 7.5, 10.);
+        if mode == "Repeat" {
+            assert!(
+                (first[0] as i32 - second[0] as i32).abs() < 40,
+                "{first:?} {second:?}"
+            );
+        } else {
+            assert!(
+                first[0] > first[2] && second[2] > second[0],
+                "{first:?} {second:?}"
+            );
+        }
+    }
+}
+
+#[test]
+fn radial_gradients_render_and_respect_end_circle() {
+    for extend in 0..=3 {
+        let shader = format!(
+            "<RadialShd StartPoint=\"5 5\" EndPoint=\"5 5\" EndRadius=\"3\" Extend=\"{extend}\">{}</RadialShd>",
+            red_blue()
+        );
+        let pixmap = render_fixture(&gradient_object(&shader, ""), "");
+        assert!(pixel(&pixmap, 10., 10.)[0] > 225);
+        let outside = pixel(&pixmap, 14., 10.);
+        assert_eq!(outside == [255, 255, 255, 255], extend & 2 == 0);
+        if extend & 2 != 0 {
+            assert!(outside[2] > 240 && outside[0] < 10);
+        }
+    }
+}
+
+#[test]
+fn gradients_combine_color_and_object_alpha_once() {
+    let shader = axial(
+        r#"StartPoint="0 0" EndPoint="10 0" Extend="3""#,
+        r#"<Segment><Color Value="255 0 0" Alpha="128"/></Segment><Segment><Color Value="255 0 0" Alpha="128"/></Segment>"#,
+    );
+    // Segment alpha, FillColor alpha and object alpha each apply once.
+    for (fill_alpha, object_alpha, expected) in [(255, 255, 127), (128, 255, 191), (128, 128, 223)]
+    {
+        let object = gradient_object(&shader, &format!("Alpha=\"{fill_alpha}\"")).replace(
+            "Fill=\"true\"",
+            &format!("Alpha=\"{object_alpha}\" Fill=\"true\""),
+        );
+        let p = pixel(&render_fixture(&object, ""), 10., 10.);
+        assert_eq!(p[0], 255);
+        assert!((p[1] as i32 - expected).abs() <= 2, "{p:?}");
+    }
+    let solid = red_path().replace("Value=\"255 0 0\"", "Value=\"255 0 0\" Alpha=\"128\"");
+    assert!((pixel(&render_fixture(&solid, ""), 10., 10.)[1] as i32 - 127).abs() <= 1);
+}
+
+#[test]
+fn gradients_inherit_color_space_and_drawing_parameters() {
+    let resources = r##"<ColorSpaces><ColorSpace ID="7" Type="GRAY"><Palette><CV>#80</CV></Palette></ColorSpace></ColorSpaces><DrawParams><DrawParam ID="8"><FillColor ColorSpace="7"><AxialShd StartPoint="0 0" EndPoint="10 0" Extend="3"><Segment><Color Index="0"/></Segment><Segment><Color Value="#80"/></Segment></AxialShd></FillColor></DrawParam><DrawParam ID="9" Relative="8"/></DrawParams>"##;
+    let object = red_path()
+        .replace(r#"<FillColor Value="255 0 0"/>"#, "")
+        .replace("Fill=\"true\"", "DrawParam=\"9\" Fill=\"true\"");
+    assert_eq!(
+        pixel(&render_fixture(&object, resources), 10., 10.),
+        [128, 128, 128, 255]
+    );
+    let override_object = object.replace(
+        "<AbbreviatedData>",
+        "<FillColor Value=\"0 255 0\"/><AbbreviatedData>",
+    );
+    assert_eq!(
+        pixel(&render_fixture(&override_object, resources), 10., 10.),
+        [0, 255, 0, 255]
+    );
+}
+
+#[test]
+fn unsupported_radial_parameters_fall_back_without_rejecting_document() {
+    for attrs in [
+        r#"StartRadius="1""#,
+        r#"Eccentricity="0.5""#,
+        r#"MapUnit="2""#,
+        r#"Angle="45""#,
+    ] {
+        let shader = format!(
+            "<RadialShd StartPoint=\"5 5\" EndPoint=\"5 5\" EndRadius=\"3\" {attrs}>{}</RadialShd>",
+            red_blue()
+        );
+        let object = gradient_object(&shader, "");
+        let doc = parser::from_bytes(&fixture(&object, "", "", &[])).unwrap();
+        assert!(doc.pages[0].objects[0].style.fill_shader.is_none());
+        assert!(
+            doc.issues
+                .iter()
+                .any(|i| i.message.contains("首段颜色回退"))
+        );
+        assert_eq!(
+            pixel(&render_fixture(&object, ""), 10., 10.),
+            [255, 0, 0, 255]
+        );
+    }
+}
+
+#[test]
+fn gradients_reject_invalid_positions_geometry_and_resource_bombs() {
+    for attrs in [
+        r#"StartPoint="0 0" EndPoint="0 0""#,
+        r#"StartPoint="NaN 0" EndPoint="10 0""#,
+        r#"StartPoint="0" EndPoint="10 0""#,
+        r#"StartPoint="0 0" EndPoint="10 0" Extend="4""#,
+        r#"StartPoint="0 0" EndPoint="10 0" MapUnit="0""#,
+    ] {
+        let object = gradient_object(&axial(attrs, red_blue()), "");
+        assert!(
+            parser::from_bytes(&fixture(&object, "", "", &[])).is_err(),
+            "{attrs}"
+        );
+    }
+    for segments in [
+        r#"<Segment Position="0.9"><Color Value="0 0 0"/></Segment><Segment Position="0.2"><Color Value="255 255 255"/></Segment>"#.to_string(),
+        r#"<Segment Position="NaN"><Color Value="0 0 0"/></Segment><Segment><Color Value="255 255 255"/></Segment>"#.to_string(),
+        r#"<Segment><Color Value="0 0 0"/></Segment>"#.repeat(65),
+    ] {
+        let object = gradient_object(&axial(r#"StartPoint="0 0" EndPoint="10 0""#, &segments), "");
+        assert!(parser::from_bytes(&fixture(&object, "", "", &[])).is_err());
+    }
+}
+
+#[test]
+fn radial_gradients_reject_nonfinite_and_invalid_parameters() {
+    for attrs in [
+        r#"StartRadius="NaN""#,
+        r#"StartRadius="-1""#,
+        r#"Eccentricity="NaN""#,
+        r#"Eccentricity="1""#,
+        r#"Angle="invalid""#,
+    ] {
+        let shader = format!(
+            "<RadialShd StartPoint=\"5 5\" EndPoint=\"5 5\" EndRadius=\"3\" {attrs}>{}</RadialShd>",
+            red_blue()
+        );
+        let object = gradient_object(&shader, "");
+        assert!(
+            parser::from_bytes(&fixture(&object, "", "", &[])).is_err(),
+            "{attrs}"
+        );
+    }
+}
+#[test]
+fn gradient_stroke_and_existing_clip_keep_their_boundaries() {
+    let shader = axial(r#"StartPoint="3 5" EndPoint="7 5""#, red_blue());
+    let object = gradient_object(&shader, "")
+        .replace(r#"Stroke="false""#, r#"Stroke="true" LineWidth="1""#)
+        .replace(
+            "<AbbreviatedData>",
+            "<StrokeColor Value=\"0 255 0\"/><AbbreviatedData>",
+        );
+    let pixmap = render_fixture(&object, "");
+    assert!(pixel(&pixmap, 6., 5.2)[1] > 240 && pixel(&pixmap, 6., 5.2)[0] < 10);
+    let object = gradient_object(&axial(r#"StartPoint="0 0" EndPoint="10 0" Extend="3""#, red_blue()), "")
+        .replace("<AbbreviatedData>", "<Clips><Clip><Area><Path><AbbreviatedData>M 0 0 L 4 0 L 4 10 L 0 10 C</AbbreviatedData></Path></Area></Clip></Clips><AbbreviatedData>");
+    let pixmap = render_fixture(&object, "");
+    assert!(pixel(&pixmap, 7., 10.)[0] > 150);
+    assert_eq!(pixel(&pixmap, 12., 10.), [255, 255, 255, 255]);
+    let object = red_path()
+        .replace(
+            r#"Fill="true" Stroke="false""#,
+            r#"Fill="false" Stroke="true" LineWidth="1""#,
+        )
+        .replace(
+            "<AbbreviatedData>",
+            &format!(
+                "<StrokeColor>{}</StrokeColor><AbbreviatedData>",
+                axial(r#"StartPoint="0 0" EndPoint="10 0" Extend="3""#, red_blue())
+            ),
+        );
+    let pixmap = render_fixture(&object, "");
+    assert!(pixel(&pixmap, 6., 5.2)[0] > 200);
+    assert!(pixel(&pixmap, 14., 5.2)[2] > 200);
+}
+
+#[test]
+fn hexadecimal_color_channels_and_palette_values_are_checked() {
+    let object = red_path().replace("255 0 0", "#FF #00 #00");
+    assert_eq!(
+        pixel(&render_fixture(&object, ""), 10., 10.),
+        [255, 0, 0, 255]
+    );
+    for value in ["#GG 0 0", "# 0 0", "NaN 0 0"] {
+        assert!(
+            parser::from_bytes(&fixture(&red_path().replace("255 0 0", value), "", "", &[]))
+                .is_err()
+        );
+    }
+    let resources = r##"<ColorSpaces><ColorSpace ID="7" Type="RGB"><Palette><CV>#GG 0 0</CV></Palette></ColorSpace></ColorSpaces>"##;
+    assert!(parser::from_bytes(&fixture(red_path(), "", resources, &[])).is_err());
+}
+
+#[test]
+fn gradient_pixels_survive_pdf_and_ofd_conversion() {
+    use ofd_reader::{
+        conversion::{self, Format, Options},
+        document::Document,
+    };
+    let object = gradient_object(
+        &axial(r#"StartPoint="0 0" EndPoint="10 0" Extend="3""#, red_blue()),
+        "",
+    );
+    let source = Document::from_ofd(parser::from_bytes(&fixture(&object, "", "", &[])).unwrap());
+    for format in [Format::Pdf, Format::Ofd] {
+        let bytes = conversion::convert(
+            &source,
+            &Options {
+                format,
+                pages: vec![0],
+                dpi: 96,
+            },
+        )
+        .unwrap();
+        let doc = if format == Format::Pdf {
+            Document::pdf_from_bytes(bytes).unwrap()
+        } else {
+            Document::from_ofd(parser::from_bytes(&bytes).unwrap())
+        };
+        let rendered = doc
+            .render(&mut Renderer::with_system_fonts(false), 0, 1., 0)
+            .unwrap();
+        let left = pixel(&rendered.pixmap, 6., 10.);
+        let right = pixel(&rendered.pixmap, 14., 10.);
+        assert!(
+            left[0] > 200 && right[2] > 200,
+            "{format:?} {left:?} {right:?}"
+        );
+    }
+}
 #[test]
 fn renderer_supports_rotation() {
     let d = parser::from_bytes(&fixture(red_path(), "", "", &[])).unwrap();

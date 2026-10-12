@@ -143,8 +143,8 @@ impl Reader<'_> {
                     "6.14",
                     "含历史版本；当前阅读器仅显示主文档版本，未展开版本树",
                 )),
-                "AxialShd" | "RadialShd" | "GouraudShd" | "LaGouraudShd" | "Pattern" => {
-                    Some(("6.3", "渐变或图案填充尚不支持，当前显示纯色近似"))
+                "GouraudShd" | "LaGouraudShd" | "Pattern" => {
+                    Some(("6.3", "该类网格渐变或图案填充尚不支持，当前使用纯色回退"))
                 }
                 "CGTransform" => None,
                 "VideoObject" => Some(("6.7", "视频对象尚不支持；归档处理应保留静态外观")),
@@ -171,6 +171,57 @@ impl Reader<'_> {
                     loc,
                     "非 Normal 混合模式尚不支持（包括未实现的 Darken 签章外观）",
                 );
+            }
+            if matches!(name, "AxialShd" | "RadialShd") {
+                if name == "RadialShd" && n.attribute("MapUnit").is_some() {
+                    self.issue(
+                        "warning",
+                        "6.3",
+                        loc,
+                        "径向渐变 MapUnit 尚不支持，使用首段颜色回退",
+                    );
+                }
+                if name == "RadialShd"
+                    && number(n.attribute("StartRadius"), 0.).abs() > f32::EPSILON
+                {
+                    self.issue(
+                        "warning",
+                        "6.3",
+                        loc,
+                        "非零起始半径的径向渐变尚不支持，使用首段颜色回退",
+                    );
+                }
+                if name == "RadialShd"
+                    && (number(n.attribute("Eccentricity"), 0.).abs() > f32::EPSILON
+                        || number(n.attribute("Angle"), 0.).abs() > f32::EPSILON)
+                {
+                    self.issue(
+                        "warning",
+                        "6.3",
+                        loc,
+                        "椭圆径向渐变尚不支持，使用首段颜色回退",
+                    );
+                }
+                if name == "RadialShd"
+                    && let (Ok(start), Ok(end)) = (
+                        nums(n.attribute("StartPoint").unwrap_or("")),
+                        nums(n.attribute("EndPoint").unwrap_or("")),
+                    )
+                    && start.len() == 2
+                    && end.len() == 2
+                    && (start[0] - end[0]).hypot(start[1] - end[1])
+                        >= number(n.attribute("EndRadius"), 0.)
+                {
+                    self.issue(
+                        "warning",
+                        "6.3",
+                        loc,
+                        "焦点位于结束圆外的径向渐变尚不支持，使用首段颜色回退",
+                    );
+                }
+                if n.parent().is_some_and(|parent| named(parent, "Color")) {
+                    self.issue("warning", "6.3", loc, "渐变 Segment 只能使用基本颜色");
+                }
             }
             if matches!(name, "TextObject")
                 && (n.attribute("ReadDirection").is_some_and(|s| s != "0")
@@ -202,9 +253,10 @@ impl Reader<'_> {
                     .map(|p| {
                         p.children()
                             .filter(|x| named(*x, "CV"))
-                            .map(|x| nums(x.text().unwrap_or("")).unwrap_or_default())
-                            .collect()
+                            .map(|x| color_channels(x.text().unwrap_or("")))
+                            .collect::<Result<Vec<_>>>()
                     })
+                    .transpose()?
                     .unwrap_or_default();
                 res.colors.insert(
                     n.attribute("ID").unwrap_or("").into(),
@@ -585,20 +637,47 @@ fn style(n: Node<'_, '_>, res: &Resources, inherited: &Style) -> Result<Style> {
     s.join = n.attribute("Join").unwrap_or(&s.join).to_string();
     s.miter = number(n.attribute("MiterLimit"), s.miter);
     if let Some(c) = child(n, "FillColor") {
-        s.fill = color(c, res)?;
+        s.fill = fallback_color(c, res)?;
+        s.fill_shader = fill_shader(c, res)?;
     }
     if let Some(c) = child(n, "StrokeColor") {
-        s.stroke = color(c, res)?;
+        s.stroke = fallback_color(c, res)?;
+        s.stroke_shader = fill_shader(c, res)?;
     }
     Ok(s)
 }
 fn color(n: Node<'_, '_>, res: &Resources) -> Result<[u8; 4]> {
+    color_with_space(n, res, None)
+}
+
+fn fallback_color(n: Node<'_, '_>, res: &Resources) -> Result<[u8; 4]> {
+    if let Some(shader) = n
+        .children()
+        .find(|node| named(*node, "AxialShd") || named(*node, "RadialShd"))
+        && let Some(segment) = child(shader, "Segment")
+        && let Some(c) = child(segment, "Color")
+    {
+        let mut rgba = color_with_space(c, res, n.attribute("ColorSpace"))?;
+        rgba[3] = (rgba[3] as f32 * number(n.attribute("Alpha"), 255.).clamp(0., 255.) / 255.)
+            .round() as u8;
+        return Ok(rgba);
+    }
+    color(n, res)
+}
+
+fn color_with_space(
+    n: Node<'_, '_>,
+    res: &Resources,
+    inherited_space: Option<&str>,
+) -> Result<[u8; 4]> {
     let cs = n
         .attribute("ColorSpace")
+        .or(inherited_space)
         .or(res.default_cs.as_deref())
         .and_then(|id| res.colors.get(id));
-    let mut values = nums(n.attribute("Value").unwrap_or("0 0 0"))?;
-    if let Some(index) = n.attribute("Index").and_then(|v| v.parse::<usize>().ok())
+    let mut values = color_channels(n.attribute("Value").unwrap_or("0 0 0"))?;
+    if n.attribute("Value").is_none()
+        && let Some(index) = n.attribute("Index").and_then(|v| v.parse::<usize>().ok())
         && let Some(v) = cs.and_then(|c| c.palette.get(index))
     {
         values = v.clone();
@@ -637,6 +716,180 @@ fn color(n: Node<'_, '_>, res: &Resources) -> Result<[u8; 4]> {
         (rgb[2] * 255.).round() as u8,
         number(n.attribute("Alpha"), 255.).clamp(0., 255.) as u8,
     ])
+}
+
+fn color_channels(s: &str) -> Result<Vec<f32>> {
+    s.split_whitespace()
+        .map(|token| {
+            let value = if let Some(hex) = token.strip_prefix('#') {
+                ensure!(!hex.is_empty(), "空的十六进制颜色通道");
+                u32::from_str_radix(hex, 16)
+                    .with_context(|| format!("无效十六进制颜色通道 {token}"))?
+                    as f32
+            } else {
+                token
+                    .parse::<f32>()
+                    .with_context(|| format!("无效颜色通道 {token}"))?
+            };
+            ensure!(value.is_finite(), "颜色通道不是有限数值");
+            Ok(value)
+        })
+        .collect()
+}
+
+fn fill_shader(n: Node<'_, '_>, res: &Resources) -> Result<Option<FillShader>> {
+    let Some(shader) = n.children().find(Node::is_element) else {
+        return Ok(None);
+    };
+    let kind = shader.tag_name().name();
+    if !matches!(kind, "AxialShd" | "RadialShd") {
+        return Ok(None);
+    }
+    let start = nums(shader.attribute("StartPoint").unwrap_or(""))?;
+    let end = nums(shader.attribute("EndPoint").unwrap_or(""))?;
+    ensure!(
+        start.len() == 2 && end.len() == 2,
+        "渐变 StartPoint/EndPoint 必须各包含两个坐标"
+    );
+    let segments: Vec<_> = shader
+        .children()
+        .filter(|child| named(*child, "Segment"))
+        .collect();
+    ensure!(
+        (2..=64).contains(&segments.len()),
+        "渐变至少需要 2 个 Segment，最多支持 64 个"
+    );
+    let mut positions: Vec<Option<f32>> = segments
+        .iter()
+        .map(|segment| {
+            segment
+                .attribute("Position")
+                .map(|value| value.parse::<f32>().context("无效渐变 Segment Position"))
+                .transpose()
+        })
+        .collect::<Result<_>>()?;
+    if positions[0].is_none() {
+        positions[0] = Some(0.);
+    }
+    let last = positions.len() - 1;
+    if positions[last].is_none() {
+        positions[last] = Some(1.);
+    }
+    let mut left = 0;
+    while left < last {
+        let right = (left + 1..=last)
+            .find(|&index| positions[index].is_some())
+            .context("渐变颜色位置缺失")?;
+        let a = positions[left].unwrap();
+        let b = positions[right].unwrap();
+        ensure!(
+            a.is_finite()
+                && b.is_finite()
+                && (0. ..=1.).contains(&a)
+                && (0. ..=1.).contains(&b)
+                && a <= b,
+            "渐变 Segment Position 必须在 0 到 1 之间且递增"
+        );
+        let span = (right - left) as f32;
+        for (index, position) in positions.iter_mut().enumerate().take(right).skip(left + 1) {
+            *position = Some(a + (b - a) * (index - left) as f32 / span);
+        }
+        left = right;
+    }
+    let inherited_space = n.attribute("ColorSpace");
+    let alpha = number(n.attribute("Alpha"), 255.).clamp(0., 255.) / 255.;
+    let stops = segments
+        .iter()
+        .zip(positions)
+        .map(|(segment, position)| {
+            let node = child(*segment, "Color").context("渐变 Segment 缺少 Color")?;
+            let mut color = color_with_space(node, res, inherited_space)?;
+            color[3] = (color[3] as f32 * alpha).round() as u8;
+            Ok(GradientStop {
+                position: position.context("渐变 Segment Position 未解析")?,
+                color,
+            })
+        })
+        .collect::<Result<Vec<_>>>()?;
+    let spread = match shader.attribute("MapType").unwrap_or("Direct") {
+        "Repeat" => GradientSpread::Repeat,
+        "Reflect" => GradientSpread::Reflect,
+        "Direct" => GradientSpread::Pad,
+        other => anyhow::bail!("不支持的渐变 MapType {other}"),
+    };
+    let start = [start[0], start[1]];
+    let end = [end[0], end[1]];
+    let extend = shader
+        .attribute("Extend")
+        .unwrap_or("0")
+        .parse::<u8>()
+        .context("无效渐变 Extend")?;
+    ensure!(extend <= 3, "渐变 Extend 必须在 0 到 3 之间");
+    if kind == "AxialShd" {
+        let length = (end[0] - start[0]).hypot(end[1] - start[1]);
+        ensure!(
+            length.is_finite() && length > 0.,
+            "轴向渐变的轴线长度必须有限且大于 0"
+        );
+        let map_unit = shader
+            .attribute("MapUnit")
+            .map(|value| value.parse::<f32>().context("无效渐变 MapUnit"))
+            .transpose()?;
+        if let Some(unit) = map_unit {
+            ensure!(unit.is_finite() && unit > 0., "渐变 MapUnit 必须大于 0");
+        }
+        Ok(Some(FillShader::Linear {
+            start,
+            end,
+            stops,
+            spread,
+            map_unit,
+            extend,
+        }))
+    } else {
+        let radius = shader
+            .attribute("EndRadius")
+            .context("径向渐变缺少 EndRadius")?
+            .parse::<f32>()
+            .context("无效径向渐变 EndRadius")?;
+        ensure!(
+            radius.is_finite() && radius > 0.,
+            "径向渐变 EndRadius 必须大于 0"
+        );
+        let parameter = |name: &str| -> Result<f32> {
+            let value = shader
+                .attribute(name)
+                .unwrap_or("0")
+                .parse::<f32>()
+                .with_context(|| format!("无效径向渐变 {name}"))?;
+            ensure!(value.is_finite(), "径向渐变 {name} 必须是有限数值");
+            Ok(value)
+        };
+        let start_radius = parameter("StartRadius")?;
+        let eccentricity = parameter("Eccentricity")?;
+        let angle = parameter("Angle")?;
+        ensure!(start_radius >= 0., "径向渐变 StartRadius 不能为负数");
+        ensure!(
+            (0. ..1.).contains(&eccentricity),
+            "径向渐变 Eccentricity 必须在 0 到 1 之间（不含 1）"
+        );
+        if start_radius.abs() > f32::EPSILON
+            || eccentricity.abs() > f32::EPSILON
+            || angle.abs() > f32::EPSILON
+            || shader.attribute("MapUnit").is_some()
+            || (start[0] - end[0]).hypot(start[1] - end[1]) >= radius
+        {
+            return Ok(None);
+        }
+        Ok(Some(FillShader::Radial {
+            start,
+            end,
+            radius,
+            stops,
+            spread,
+            extend,
+        }))
+    }
 }
 
 fn collect_text(objects: &[Graphic], out: &mut String) {

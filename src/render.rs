@@ -5,7 +5,10 @@ use std::{
     io::Cursor,
     sync::Arc,
 };
-use tiny_skia::{FillRule, Mask, Paint, Path, PathBuilder, Pixmap, Stroke, Transform};
+use tiny_skia::{
+    FillRule, LinearGradient, Mask, Paint, Path, PathBuilder, Pixmap, RadialGradient, Shader,
+    SpreadMode, Stroke, Transform,
+};
 
 pub struct Rendered {
     pub pixmap: Pixmap,
@@ -341,7 +344,7 @@ impl Renderer {
                         transform,
                         opacity,
                         mask.as_ref(),
-                    ),
+                    )?,
                     Ok(None) => (),
                     Err(e) => {
                         warnings.insert(format!("路径 {}: {e}", o.id));
@@ -421,7 +424,7 @@ impl Renderer {
                                                 transform,
                                                 opacity,
                                                 mask.as_ref(),
-                                            );
+                                            )?;
                                         }
                                     } else {
                                         warnings
@@ -516,25 +519,31 @@ fn draw_path(
     transform: Matrix,
     opacity: f32,
     mask: Option<&Mask>,
-) {
-    let paint = |color: [u8; 4]| {
+) -> Result<()> {
+    let paint = |color: [u8; 4], shader: Option<&FillShader>| {
         let mut p = Paint::default();
-        p.set_color_rgba8(
-            color[0],
-            color[1],
-            color[2],
-            (color[3] as f32 * opacity).round() as u8,
-        );
+        p.set_color_rgba8(color[0], color[1], color[2], color[3]);
+        if let Some(shader) = shader.and_then(make_shader) {
+            p.shader = shader;
+        }
+        p.shader.apply_opacity(opacity);
         p.anti_alias = true;
         p
     };
     if fill {
+        let gradient_mask = gradient_mask(
+            style.fill_shader.as_ref(),
+            pixmap.width(),
+            pixmap.height(),
+            transform,
+            mask,
+        )?;
         pixmap.fill_path(
             path,
-            &paint(style.fill),
+            &paint(style.fill, style.fill_shader.as_ref()),
             rule(even_odd),
             ts(transform),
-            mask,
+            gradient_mask.as_ref().or(mask),
         )
     }
     if stroke {
@@ -555,8 +564,174 @@ fn draw_path(
             miter_limit: style.miter.max(1.),
             dash: tiny_skia::StrokeDash::new(style.dash.clone(), style.dash_offset),
         };
-        pixmap.stroke_path(path, &paint(style.stroke), &st, ts(transform), mask);
+        let gradient_mask = gradient_mask(
+            style.stroke_shader.as_ref(),
+            pixmap.width(),
+            pixmap.height(),
+            transform,
+            mask,
+        )?;
+        pixmap.stroke_path(
+            path,
+            &paint(style.stroke, style.stroke_shader.as_ref()),
+            &st,
+            ts(transform),
+            gradient_mask.as_ref().or(mask),
+        );
     }
+    Ok(())
+}
+
+fn make_shader(shader: &FillShader) -> Option<Shader<'static>> {
+    let stops = |stops: &[crate::model::GradientStop]| {
+        stops
+            .iter()
+            .map(|stop| {
+                tiny_skia::GradientStop::new(
+                    stop.position,
+                    tiny_skia::Color::from_rgba8(
+                        stop.color[0],
+                        stop.color[1],
+                        stop.color[2],
+                        stop.color[3],
+                    ),
+                )
+            })
+            .collect::<Vec<_>>()
+    };
+    let spread = |spread| match spread {
+        GradientSpread::Pad => SpreadMode::Pad,
+        GradientSpread::Repeat => SpreadMode::Repeat,
+        GradientSpread::Reflect => SpreadMode::Reflect,
+    };
+    // tiny-skia applies the path transform to the shader itself. Keep both in local coordinates.
+    match shader {
+        FillShader::Linear {
+            start,
+            end,
+            stops: colors,
+            spread: mode,
+            map_unit,
+            ..
+        } => {
+            let mut end = *end;
+            if !matches!(mode, GradientSpread::Pad)
+                && let Some(unit) = map_unit
+            {
+                let dx = end[0] - start[0];
+                let dy = end[1] - start[1];
+                let factor = unit / dx.hypot(dy);
+                end = [start[0] + dx * factor, start[1] + dy * factor];
+            }
+            LinearGradient::new(
+                tiny_skia::Point::from_xy(start[0], start[1]),
+                tiny_skia::Point::from_xy(end[0], end[1]),
+                stops(colors),
+                spread(*mode),
+                Transform::identity(),
+            )
+        }
+        FillShader::Radial {
+            start,
+            end,
+            radius,
+            stops: colors,
+            spread: mode,
+            ..
+        } => RadialGradient::new(
+            tiny_skia::Point::from_xy(start[0], start[1]),
+            tiny_skia::Point::from_xy(end[0], end[1]),
+            *radius,
+            stops(colors),
+            spread(*mode),
+            Transform::identity(),
+        ),
+    }
+}
+
+fn gradient_mask(
+    shader: Option<&FillShader>,
+    width: u32,
+    height: u32,
+    transform: Matrix,
+    parent: Option<&Mask>,
+) -> Result<Option<Mask>> {
+    let path = match shader {
+        Some(FillShader::Linear {
+            start, end, extend, ..
+        }) if *extend != 3 => {
+            let Some(inverse) = ts(transform).invert() else {
+                return Ok(None);
+            };
+            let mut points = [
+                tiny_skia::Point::from_xy(0., 0.),
+                tiny_skia::Point::from_xy(width as f32, 0.),
+                tiny_skia::Point::from_xy(width as f32, height as f32),
+                tiny_skia::Point::from_xy(0., height as f32),
+            ];
+            inverse.map_points(&mut points);
+            let mut polygon: Vec<_> = points.into_iter().map(|p| [p.x, p.y]).collect();
+            let direction = [end[0] - start[0], end[1] - start[1]];
+            if extend & 1 == 0 {
+                polygon = clip_half_plane(&polygon, *start, direction);
+            }
+            if extend & 2 == 0 {
+                polygon = clip_half_plane(&polygon, *end, [-direction[0], -direction[1]]);
+            }
+            let mut builder = PathBuilder::new();
+            if let Some(first) = polygon.first() {
+                builder.move_to(first[0], first[1]);
+                for point in polygon.iter().skip(1) {
+                    builder.line_to(point[0], point[1]);
+                }
+                builder.close();
+            }
+            builder.finish()
+        }
+        Some(FillShader::Radial {
+            end,
+            radius,
+            extend,
+            ..
+        }) if extend & 2 == 0 => {
+            let mut builder = PathBuilder::new();
+            builder.push_circle(end[0], end[1], *radius);
+            builder.finish()
+        }
+        _ => return Ok(None),
+    };
+    let mut mask = Mask::new(width, height).context("渐变裁剪内存不足")?;
+    if let Some(path) = path {
+        mask.fill_path(&path, FillRule::Winding, true, ts(transform));
+    }
+    intersect_mask(&mut mask, parent);
+    Ok(Some(mask))
+}
+
+fn clip_half_plane(polygon: &[[f32; 2]], origin: [f32; 2], normal: [f32; 2]) -> Vec<[f32; 2]> {
+    let distance =
+        |point: [f32; 2]| (point[0] - origin[0]) * normal[0] + (point[1] - origin[1]) * normal[1];
+    let mut result = Vec::new();
+    let Some(mut previous) = polygon.last().copied() else {
+        return result;
+    };
+    let mut previous_distance = distance(previous);
+    for &current in polygon {
+        let current_distance = distance(current);
+        if (current_distance >= 0.) != (previous_distance >= 0.) {
+            let t = previous_distance / (previous_distance - current_distance);
+            result.push([
+                previous[0] + t * (current[0] - previous[0]),
+                previous[1] + t * (current[1] - previous[1]),
+            ]);
+        }
+        if current_distance >= 0. {
+            result.push(current);
+        }
+        previous = current;
+        previous_distance = current_distance;
+    }
+    result
 }
 fn decode_image(bytes: &[u8]) -> Result<Pixmap> {
     let mut reader = image::ImageReader::new(Cursor::new(bytes)).with_guessed_format()?;

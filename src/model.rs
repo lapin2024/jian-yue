@@ -39,7 +39,9 @@ impl Matrix {
 #[derive(Clone, Debug)]
 pub struct Style {
     pub fill: [u8; 4],
+    pub fill_shader: Option<FillShader>,
     pub stroke: [u8; 4],
+    pub stroke_shader: Option<FillShader>,
     pub width: f32,
     pub dash: Vec<f32>,
     pub dash_offset: f32,
@@ -51,7 +53,9 @@ impl Default for Style {
     fn default() -> Self {
         Self {
             fill: [0, 0, 0, 255],
+            fill_shader: None,
             stroke: [0, 0, 0, 255],
+            stroke_shader: None,
             width: 0.353,
             dash: vec![],
             dash_offset: 0.,
@@ -60,6 +64,36 @@ impl Default for Style {
             miter: 3.528,
         }
     }
+}
+#[derive(Clone, Debug)]
+pub struct GradientStop {
+    pub position: f32,
+    pub color: [u8; 4],
+}
+#[derive(Clone, Copy, Debug)]
+pub enum GradientSpread {
+    Pad,
+    Repeat,
+    Reflect,
+}
+#[derive(Clone, Debug)]
+pub enum FillShader {
+    Linear {
+        start: [f32; 2],
+        end: [f32; 2],
+        stops: Vec<GradientStop>,
+        spread: GradientSpread,
+        map_unit: Option<f32>,
+        extend: u8,
+    },
+    Radial {
+        start: [f32; 2],
+        end: [f32; 2],
+        radius: f32,
+        stops: Vec<GradientStop>,
+        spread: GradientSpread,
+        extend: u8,
+    },
 }
 #[derive(Clone, Debug)]
 pub struct Clip {

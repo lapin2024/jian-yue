@@ -1,7 +1,5 @@
 //! Default-app registration runs only when the user clicks the settings button.
-#[cfg(target_os = "linux")]
-use anyhow::Context;
-use anyhow::{Result, ensure};
+use anyhow::{Context, Result, ensure};
 use std::path::Path;
 #[derive(Debug)]
 pub struct Registration {
@@ -10,12 +8,48 @@ pub struct Registration {
     pub value: String,
     pub kind: &'static str,
 }
-pub fn windows_plan(exe: &Path) -> Result<Vec<Registration>> {
-    let exe = exe.to_string_lossy();
+// canonicalize() produces verbatim paths on Windows. Explorer association commands
+// need ordinary drive or UNC paths; never strip an arbitrary device namespace.
+fn windows_shell_path(path: &Path) -> Result<String> {
+    let path = path.to_str().context("程序路径不是有效 Unicode")?;
     ensure!(
-        !exe.contains(['\n', '\r', '\0', '"']),
+        !path.contains(['\n', '\r', '\0', '"']),
         "程序路径含不支持字符"
     );
+    let path = if path
+        .get(..8)
+        .is_some_and(|prefix| prefix.eq_ignore_ascii_case(r"\\?\UNC\"))
+    {
+        format!(r"\\{}", &path[8..])
+    } else if let Some(drive) = path.strip_prefix(r"\\?\") {
+        ensure!(
+            is_windows_drive_path(drive),
+            "不支持在 Windows 设备路径中注册程序"
+        );
+        drive.to_owned()
+    } else {
+        path.to_owned()
+    };
+    let unc = path.strip_prefix(r"\\").is_some_and(|tail| {
+        let mut parts = tail.split('\\');
+        matches!(parts.next(), Some(server) if !server.is_empty() && server != "." && server != "?")
+            && parts.next().is_some_and(|share| !share.is_empty())
+    });
+    ensure!(
+        is_windows_drive_path(&path) || unc,
+        "Windows 程序路径必须是绝对文件路径"
+    );
+    Ok(path)
+}
+fn is_windows_drive_path(path: &str) -> bool {
+    let bytes = path.as_bytes();
+    bytes.len() >= 3
+        && bytes[0].is_ascii_alphabetic()
+        && bytes[1] == b':'
+        && matches!(bytes[2], b'\\' | b'/')
+}
+pub fn windows_plan(exe: &Path) -> Result<Vec<Registration>> {
+    let exe = windows_shell_path(exe)?;
     let mut values = vec![];
     let mut add = |key: String, name: &str, value: String, kind: &'static str| {
         values.push(Registration {
@@ -25,6 +59,37 @@ pub fn windows_plan(exe: &Path) -> Result<Vec<Registration>> {
             kind,
         })
     };
+    let filename = exe
+        .rsplit(['/', '\\'])
+        .next()
+        .context("程序路径缺少文件名")?;
+    let application = format!("HKCU\\Software\\Classes\\Applications\\{filename}");
+    add(
+        application.clone(),
+        "FriendlyAppName",
+        "简阅".into(),
+        "REG_SZ",
+    );
+    add(
+        format!("{application}\\shell\\open\\command"),
+        "",
+        format!("\"{exe}\" \"%1\""),
+        "REG_SZ",
+    );
+    add(
+        format!("{application}\\DefaultIcon"),
+        "",
+        format!("\"{exe}\",0"),
+        "REG_SZ",
+    );
+    for ext in ["ofd", "pdf"] {
+        add(
+            format!("{application}\\SupportedTypes"),
+            &format!(".{ext}"),
+            String::new(),
+            "REG_SZ",
+        );
+    }
     for (ext, label) in [("ofd", "OFD document"), ("pdf", "PDF document")] {
         let prog = format!("JianYue.{ext}");
         let root = format!("HKCU\\Software\\Classes\\{prog}");
@@ -132,6 +197,14 @@ pub fn set_defaults(ofd: bool, pdf: bool) -> Result<String> {
             out.status.success(),
             "无法注册文件类型：{}",
             String::from_utf8_lossy(&out.stderr)
+        );
+    }
+    unsafe {
+        windows_sys::Win32::UI::Shell::SHChangeNotify(
+            windows_sys::Win32::UI::Shell::SHCNE_ASSOCCHANGED as i32,
+            windows_sys::Win32::UI::Shell::SHCNF_IDLIST,
+            std::ptr::null(),
+            std::ptr::null(),
         );
     }
     let verb: Vec<u16> = "open".encode_utf16().chain(Some(0)).collect();

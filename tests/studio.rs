@@ -304,6 +304,54 @@ fn default_registration_quotes_paths_and_does_not_touch_userchoice() {
     assert!(desktop.contains("Exec=\"/opt/Reader Space/reader\" %f"));
     assert!(desktop.contains("application/ofd"));
 }
+
+#[test]
+fn windows_registration_converts_verbatim_drive_and_unc_paths() {
+    for (input, expected) in [
+        (r"\\?\E:\阅读 工具\简阅.exe", r"E:\阅读 工具\简阅.exe"),
+        (r"\\?\UNC\server\share\简阅.exe", r"\\server\share\简阅.exe"),
+        (r"\\server\share\简阅.exe", r"\\server\share\简阅.exe"),
+    ] {
+        let values = ofd_reader::associations::windows_plan(std::path::Path::new(input)).unwrap();
+        let commands: Vec<_> = values
+            .iter()
+            .filter(|v| v.key.ends_with(r"\shell\open\command"))
+            .collect();
+        assert_eq!(commands.len(), 3);
+        for command in commands {
+            assert_eq!(command.value, format!("\"{expected}\" \"%1\""));
+        }
+        assert!(
+            values
+                .iter()
+                .filter(|v| v.key.ends_with(r"\DefaultIcon"))
+                .all(|v| v.value == format!("\"{expected}\",0"))
+        );
+        assert!(values.iter().any(
+            |v| v.key.ends_with(r"\Applications\简阅.exe\SupportedTypes") && v.name == ".ofd"
+        ));
+        assert!(values.iter().any(
+            |v| v.key.ends_with(r"\Applications\简阅.exe\SupportedTypes") && v.name == ".pdf"
+        ));
+    }
+}
+#[test]
+fn windows_registration_rejects_relative_and_device_paths() {
+    for path in [
+        r"reader.exe",
+        r"C:reader.exe",
+        r"\\.\pipe\reader.exe",
+        r"\\?\Volume{example}\reader.exe",
+        "C:\\bad\nname.exe",
+        "C:\\bad\"name.exe",
+    ] {
+        assert!(
+            ofd_reader::associations::windows_plan(std::path::Path::new(path)).is_err(),
+            "{path}"
+        );
+    }
+}
+
 #[test]
 fn source_hash_guards_project_reopening() {
     let source = pdf();
